@@ -6,8 +6,9 @@ describe('JotForm Webhook Handler', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		vi.stubGlobal('fetch', vi.fn());
-		// @ts-ignore - Override WORKER_AUTH_TOKEN
+		// @ts-ignore - Override environment variables
 		env.WORKER_AUTH_TOKEN = 'deadbeef';
+		env.SIMPLELISTS_API_TOKEN = 'fake-simplelists-token';
 	});
 
 	describe('Method Validation', () => {
