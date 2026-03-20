@@ -4,9 +4,10 @@ set -e -u
 
 source .env
 
-TOKEN=${WORKER_AUTH_TOKEN}
-#API=https://www.simplelists.com/api/2
-API=http://localhost:8787
+#TOKEN=${WORKER_AUTH_TOKEN}
+TOKEN=${SIMPLELIST_TOKEN}
+API=https://www.simplelists.com/api/2
+#API=http://localhost:8787
 
 firstname="Curly S"
 emails="curly2120@bmaart.org"
@@ -26,12 +27,6 @@ function test_create_new() {
   -d "{\"firstname\":\"$firstname\",\"lists\":\"$lists\",\"emails\":\"$emails\"}"
 }
 
-set -x
-test_create_new
-
-exit
-
-
 get_existing_contact_from_search() {
 curl -X GET \
   -vs $API/contacts/?email=curly7@bmaart.org \
@@ -44,18 +39,20 @@ curl -X GET \
   -H "Authorization: Bearer $TOKEN" | jq # ".data[0].id"
 }
 
-
 put_list_onto_contact() { 
+# use Content-Type: application/x-www-form-urlencoded
 curl -X PUT \
-  -vs $API/contacts/19268211/ \
+  -vs $API/contacts/$contactId/ \
   -H "Authorization: Bearer $TOKEN"  \
-  -d "lists=list-admins" \
+  -d "lists=$lists"
 
 }
 
-put_list_onto_contact | jq
-get_contact_by_id
-
+#put_list_onto_contact | jq
+#get_contact_by_id
+set -x
+get_existing_contact_from_search
+set +x
 
 
 

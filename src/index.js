@@ -79,6 +79,30 @@ export default {
 
 		// If we get a 200, then use PUT to just update the
 		// Contact with the additional list
+		if (simplelistsResponse.status === 200) {
+			const responseData = await simplelistsResponse.json();
+			const contactId = responseData.data?.[0]?.id;
+			console.log('Found existing contact with ID:', contactId);
+
+			const putUrl = `${CONTACTS}${contactId}/`;
+			console.log('Making PUT request to:', putUrl);
+			const putBody = new URLSearchParams({ lists: lists || '' });
+			const putResponse = await fetch(putUrl, {
+				method: 'PUT',
+				headers: {
+					Authorization: `Bearer ${env.SIMPLELISTS_API_TOKEN}`,
+					'Content-Type': 'application/x-www-form-urlencoded',
+				},
+				body: putBody,
+			});
+			console.log('PUT response status:', putResponse.status);
+
+			const putResponseText = await putResponse.text();
+			console.log('PUT response body:', putResponseText);
+			return new Response(putResponseText, {
+				status: putResponse.status,
+			});
+		}
 
 		// Return the Simplelists response status back to JotForm
 		const responseText = await simplelistsResponse.text();
