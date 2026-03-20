@@ -20,10 +20,10 @@ daynow=$(date +"%d%H%M%S")
 
 function test_create_new() {
   curl $API -vs \
+  -X POST \
   -H "Authorization: Bearer $TOKEN" \
-  -d firstname=$firstname \
-  -d lists=$lists \
-  -d emails=$emails
+  -H "Content-Type: application/json" \
+  -d "{\"firstname\":\"$firstname\",\"lists\":\"$lists\",\"emails\":\"$emails\"}"
 }
 
 set -x

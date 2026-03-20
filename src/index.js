@@ -37,19 +37,18 @@ export default {
 		const lists = body.lists;
 		const firstname = body.firstname;
 
-
-		if (!email) {
-			return new Response('No email found in payload', { status: 400 });
-		}
+		console.log('Extracted from JotForm:', { email, lists, firstname });
 
 		// Try to GET the contact from Simplelists
 		const contactUrl = `${CONTACTS}?email=${encodeURIComponent(email)}`;
+		console.log('Making GET request to:', contactUrl);
 		const simplelistsResponse = await fetch(contactUrl, {
 			method: 'GET',
 			headers: {
 				Authorization: `Bearer ${env.SIMPLELISTS_API_TOKEN}`,
 			},
 		});
+		console.log('GET response status:', simplelistsResponse.status);
 
 		// If we get a 404, then create a new contact with
 		// Firstname and Email and List subscription
@@ -59,6 +58,7 @@ export default {
 				lists: lists || '',
 				emails: email,
 			});
+			console.log('Contact not found (404), creating new contact with body:', createBody.toString());
 
 			const createResponse = await fetch(CONTACTS, {
 				method: 'POST',
@@ -68,8 +68,10 @@ export default {
 				},
 				body: createBody,
 			});
+			console.log('POST response status:', createResponse.status);
 
 			const createResponseText = await createResponse.text();
+			console.log('POST response body:', createResponseText);
 			return new Response(createResponseText, {
 				status: createResponse.status,
 			});
@@ -80,6 +82,7 @@ export default {
 
 		// Return the Simplelists response status back to JotForm
 		const responseText = await simplelistsResponse.text();
+		console.log('Returning GET response to JotForm:', { status: simplelistsResponse.status, body: responseText });
 		return new Response(responseText, {
 			status: simplelistsResponse.status,
 		});
