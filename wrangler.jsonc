@@ -4,7 +4,7 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "my-first-worker",
+	"name": "jotform-simplelists-relay",
 	"main": "src/index.js",
 	"compatibility_date": "2026-03-10",
 	"observability": {

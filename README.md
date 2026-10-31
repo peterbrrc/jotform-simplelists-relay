@@ -46,3 +46,11 @@ Jotform's webhook support is rather primitive, so we use this CloudFlare Worker 
     - If it fails because the Contact already exists
       - It tries to add the List subscription to the existing contact.
     - 
+
+
+If you try to approve an email that's already been approved, you'll get the page:
+
+Thank you! Your task has been completed.
+
+If you forgot to approve an email, you'll get a reminder in X days.
+

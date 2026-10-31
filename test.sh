@@ -6,12 +6,12 @@ source .env
 
 #TOKEN=${WORKER_AUTH_TOKEN}
 TOKEN=${SIMPLELIST_TOKEN}
-API=https://www.simplelists.com/api/2
+API=https://www.simplelists.com/api/2/contacts/
 #API=http://localhost:8787
 
-firstname="Curly S"
-emails="curly2120@bmaart.org"
-lists="list-admins"
+#firstname="Curly S"
+#emails="curly2120@bmaart.org"
+#lists="list-admins"
 
 if [ -z "$TOKEN" ] ; then
   die "SIMPLELIST_TOKEN env var needs to be set"
@@ -19,13 +19,28 @@ fi
 
 daynow=$(date +"%d%H%M%S")
 
-function test_create_new() {
+test_create_new() {
   curl $API -vs \
   -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d "{\"firstname\":\"$firstname\",\"lists\":\"$lists\",\"emails\":\"$emails\"}"
 }
+
+test_create_directly_api() {
+  curl $API -vs -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -d firstname=John \
+  -d surname=Smith \
+  -d lists=columbia-announce \
+  -d emails=johnsmith@bmaart.org
+}
+
+set -x
+test_create_directly_api
+set +x
+
+exit
 
 get_existing_contact_from_search() {
 curl -X GET \
@@ -43,16 +58,17 @@ put_list_onto_contact() {
 # use Content-Type: application/x-www-form-urlencoded
 curl -X PUT \
   -vs $API/contacts/$contactId/ \
-  -H "Authorization: Bearer $TOKEN"  \
   -d "lists=$lists"
-
 }
+
+
 
 #put_list_onto_contact | jq
 #get_contact_by_id
-set -x
-get_existing_contact_from_search
-set +x
+
+#curl -vs 'https://www.simplelists.com/api/2/contacts/?email=webform321-1731%40bmaart.org' \
+#  -H "Authorization: Bearer xxxxxx" 
+#get_existing_contact_from_search
 
 
 

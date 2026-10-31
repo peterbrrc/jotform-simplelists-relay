@@ -14,13 +14,19 @@ export default {
 	async fetch(request, env) {
 		// Only allow POST requests
 		if (request.method !== 'POST') {
-			return new Response('Method not allowed', { status: 405 });
+			return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+				status: 405,
+				headers: { 'Content-Type': 'application/json' },
+			});
 		}
 
 		// Require authorization
 		const authHeader = request.headers.get('Authorization');
 		if (!authHeader || authHeader !== `Bearer ${env.WORKER_AUTH_TOKEN}`) {
-			return new Response('Unauthorized', { status: 401 });
+			return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+				status: 401,
+				headers: { 'Content-Type': 'application/json' },
+			});
 		}
 
 		// Parse the incoming JSON body from JotForm
@@ -28,7 +34,10 @@ export default {
 		try {
 			body = await request.json();
 		} catch (e) {
-			return new Response('Invalid JSON body', { status: 400 });
+			return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
 		}
 
 		// Extract the email address — adjust the field name to match
@@ -38,6 +47,13 @@ export default {
 		const firstname = body.firstname;
 
 		console.log('Extracted from JotForm:', { email, lists, firstname });
+
+		if (!email) {
+			return new Response(JSON.stringify({ error: 'No email found in payload' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
 		// Try to GET the contact from Simplelists
 		const contactUrl = `${CONTACTS}?email=${encodeURIComponent(email)}`;
@@ -72,8 +88,15 @@ export default {
 
 			const createResponseText = await createResponse.text();
 			console.log('POST response body:', createResponseText);
-			return new Response(createResponseText, {
+			let createResponseJson;
+			try {
+				createResponseJson = JSON.parse(createResponseText);
+			} catch (e) {
+				createResponseJson = { message: createResponseText };
+			}
+			return new Response(JSON.stringify(createResponseJson), {
 				status: createResponse.status,
+				headers: { 'Content-Type': 'application/json' },
 			});
 		}
 
@@ -99,16 +122,30 @@ export default {
 
 			const putResponseText = await putResponse.text();
 			console.log('PUT response body:', putResponseText);
-			return new Response(putResponseText, {
+			let putResponseJson;
+			try {
+				putResponseJson = JSON.parse(putResponseText);
+			} catch (e) {
+				putResponseJson = { message: putResponseText };
+			}
+			return new Response(JSON.stringify(putResponseJson), {
 				status: putResponse.status,
+				headers: { 'Content-Type': 'application/json' },
 			});
 		}
 
 		// Return the Simplelists response status back to JotForm
 		const responseText = await simplelistsResponse.text();
 		console.log('Returning GET response to JotForm:', { status: simplelistsResponse.status, body: responseText });
-		return new Response(responseText, {
+		let responseJson;
+		try {
+			responseJson = JSON.parse(responseText);
+		} catch (e) {
+			responseJson = { message: responseText };
+		}
+		return new Response(JSON.stringify(responseJson), {
 			status: simplelistsResponse.status,
+			headers: { 'Content-Type': 'application/json' },
 		});
 	},
 };

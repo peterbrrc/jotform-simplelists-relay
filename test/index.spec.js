@@ -18,7 +18,7 @@ describe('JotForm Webhook Handler', () => {
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
 			expect(response.status).toBe(405);
-			expect(await response.text()).toBe('Method not allowed');
+			expect(await response.json()).toEqual({ error: 'Method not allowed' });
 		});
 
 		it('rejects PUT requests with 405', async () => {
@@ -43,8 +43,14 @@ describe('JotForm Webhook Handler', () => {
 				headers: { Authorization: 'Bearer deadbeef', 'Content-Type': 'application/json' },
 				body: JSON.stringify({ emails: 'test@example.com' }),
 			});
-			// Mock Simplelists response
-			vi.mocked(fetch).mockResolvedValueOnce(new Response('OK', { status: 200 }));
+			// Mock Simplelists response - contact found
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ data: [{ id: 12345 }] }), { status: 200 })
+			);
+			// Mock PUT response
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ success: true }), { status: 200 })
+			);
 			const ctx = createExecutionContext();
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
@@ -63,7 +69,7 @@ describe('JotForm Webhook Handler', () => {
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
 			expect(response.status).toBe(401);
-			expect(await response.text()).toBe('Unauthorized');
+			expect(await response.json()).toEqual({ error: 'Unauthorized' });
 		});
 
 		it('rejects requests with invalid token (401)', async () => {
@@ -76,7 +82,7 @@ describe('JotForm Webhook Handler', () => {
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
 			expect(response.status).toBe(401);
-			expect(await response.text()).toBe('Unauthorized');
+			expect(await response.json()).toEqual({ error: 'Unauthorized' });
 		});
 
 		it('accepts requests with valid Bearer token', async () => {
@@ -85,7 +91,14 @@ describe('JotForm Webhook Handler', () => {
 				headers: { Authorization: 'Bearer deadbeef', 'Content-Type': 'application/json' },
 				body: JSON.stringify({ emails: 'test@example.com' }),
 			});
-			vi.mocked(fetch).mockResolvedValueOnce(new Response('OK', { status: 200 }));
+			// Mock GET - contact found
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ data: [{ id: 12345 }] }), { status: 200 })
+			);
+			// Mock PUT response
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ success: true }), { status: 200 })
+			);
 			const ctx = createExecutionContext();
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
@@ -104,7 +117,7 @@ describe('JotForm Webhook Handler', () => {
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
 			expect(response.status).toBe(400);
-			expect(await response.text()).toBe('Invalid JSON body');
+			expect(await response.json()).toEqual({ error: 'Invalid JSON body' });
 		});
 
 		it('accepts valid JSON', async () => {
@@ -113,7 +126,14 @@ describe('JotForm Webhook Handler', () => {
 				headers: { Authorization: 'Bearer deadbeef', 'Content-Type': 'application/json' },
 				body: JSON.stringify({ emails: 'test@example.com' }),
 			});
-			vi.mocked(fetch).mockResolvedValueOnce(new Response('OK', { status: 200 }));
+			// Mock GET - contact found
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ data: [{ id: 12345 }] }), { status: 200 })
+			);
+			// Mock PUT response
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ success: true }), { status: 200 })
+			);
 			const ctx = createExecutionContext();
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
@@ -132,7 +152,7 @@ describe('JotForm Webhook Handler', () => {
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
 			expect(response.status).toBe(400);
-			expect(await response.text()).toBe('No email found in payload');
+			expect(await response.json()).toEqual({ error: 'No email found in payload' });
 		});
 
 		it('extracts email from "emails" field', async () => {
@@ -141,7 +161,14 @@ describe('JotForm Webhook Handler', () => {
 				headers: { Authorization: 'Bearer deadbeef', 'Content-Type': 'application/json' },
 				body: JSON.stringify({ emails: 'test@example.com' }),
 			});
-			vi.mocked(fetch).mockResolvedValueOnce(new Response('OK', { status: 200 }));
+			// Mock GET - contact found
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ data: [{ id: 12345 }] }), { status: 200 })
+			);
+			// Mock PUT response
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ success: true }), { status: 200 })
+			);
 			const ctx = createExecutionContext();
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
@@ -154,7 +181,14 @@ describe('JotForm Webhook Handler', () => {
 				headers: { Authorization: 'Bearer deadbeef', 'Content-Type': 'application/json' },
 				body: JSON.stringify({ email: 'test@example.com' }),
 			});
-			vi.mocked(fetch).mockResolvedValueOnce(new Response('OK', { status: 200 }));
+			// Mock GET - contact found
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ data: [{ id: 12345 }] }), { status: 200 })
+			);
+			// Mock PUT response
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ success: true }), { status: 200 })
+			);
 			const ctx = createExecutionContext();
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
@@ -167,7 +201,14 @@ describe('JotForm Webhook Handler', () => {
 				headers: { Authorization: 'Bearer deadbeef', 'Content-Type': 'application/json' },
 				body: JSON.stringify({ submitter_email: 'test@example.com' }),
 			});
-			vi.mocked(fetch).mockResolvedValueOnce(new Response('OK', { status: 200 }));
+			// Mock GET - contact found
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ data: [{ id: 12345 }] }), { status: 200 })
+			);
+			// Mock PUT response
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ success: true }), { status: 200 })
+			);
 			const ctx = createExecutionContext();
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
@@ -176,18 +217,25 @@ describe('JotForm Webhook Handler', () => {
 	});
 
 	describe('Simplelists Forwarding', () => {
-		it('forwards email to Simplelists API', async () => {
+		it('forwards email to Simplelists API - contact found (PUT)', async () => {
 			const request = new Request('http://example.com', {
 				method: 'POST',
 				headers: { Authorization: 'Bearer deadbeef', 'Content-Type': 'application/json' },
-				body: JSON.stringify({ emails: 'test@example.com' }),
+				body: JSON.stringify({ emails: 'test@example.com', lists: 'list-admins' }),
 			});
-			vi.mocked(fetch).mockResolvedValueOnce(new Response('Contact added', { status: 200 }));
+			// Mock GET - contact found
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ data: [{ id: 12345 }] }), { status: 200 })
+			);
+			// Mock PUT response
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ message: 'Contact updated' }), { status: 200 })
+			);
 			const ctx = createExecutionContext();
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
 			expect(response.status).toBe(200);
-			expect(await response.text()).toBe('Contact added');
+			expect(await response.json()).toEqual({ message: 'Contact updated' });
 		});
 
 		it('returns Simplelists error status', async () => {
@@ -196,12 +244,15 @@ describe('JotForm Webhook Handler', () => {
 				headers: { Authorization: 'Bearer deadbeef', 'Content-Type': 'application/json' },
 				body: JSON.stringify({ emails: 'test@example.com' }),
 			});
-			vi.mocked(fetch).mockResolvedValueOnce(new Response('Duplicate email', { status: 409 }));
+			// Mock GET - returns error
+			vi.mocked(fetch).mockResolvedValueOnce(
+				new Response(JSON.stringify({ message: 'Duplicate email' }), { status: 409 })
+			);
 			const ctx = createExecutionContext();
 			const response = await worker.fetch(request, env, ctx);
 			await waitOnExecutionContext(ctx);
 			expect(response.status).toBe(409);
-			expect(await response.text()).toBe('Duplicate email');
+			expect(await response.json()).toEqual({ message: 'Duplicate email' });
 		});
 	});
 });
