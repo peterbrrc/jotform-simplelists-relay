@@ -32,7 +32,36 @@ If you don't hear from us, contact: chapter@rrc.org
 
 ---
 
-Under the hood:
+## Under the hood / JotForm
+
+We use Jotform Forms plus a Jotform Workflow:
+
+### The form:
+
+The form has a few JotForm features:
+
+- Field 5: "Which chapter are you interested in?" (drop-down) has "Options" that includes "Calculation Values". So selecting "DC & Md suburbs" is mapped to the value "hy-ss-announce": 
+    ```
+    IF
+    1. Which chapter are you interested in?
+    STATE
+    Is Filled
+    DO
+    Copy Field Value
+    From
+    2. Which chapter are you interested in?
+    To
+    3. Target list
+    ```
+
+- then "Target list" is populated, but hidden from the respondent.
+- Terms & Condition acceptance field
+
+### The workflow: 
+
+See the "Test workflow" for a simple example.
+
+### Jotform to SimpleList middleware
 
 Jotform's webhook support is rather primitive, so we use this CloudFlare Worker shim as middleware.
 
@@ -45,7 +74,6 @@ Jotform's webhook support is rather primitive, so we use this CloudFlare Worker 
   - It attempts to POST to Simplelists by creating a new Contact
     - If it fails because the Contact already exists
       - It tries to add the List subscription to the existing contact.
-    - 
 
 
 If you try to approve an email that's already been approved, you'll get the page:
